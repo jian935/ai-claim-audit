@@ -96,6 +96,19 @@ PY
 Validate the skill structure separately; validation and packaging are two
 different jobs.
 
+Adding or editing a case in `semantic.json` / `trigger.json` also requires
+regenerating the blind question sheet and the answer template:
+
+```bash
+python scripts/eval_extras.py --make-blind-pack
+python scripts/eval_extras.py --make-template
+```
+
+CI rebuilds both and fails if they are stale. Filled-in predictions belong in
+`evals/my_predictions.json` (gitignored), never in the tracked template. See
+[`evals/BLIND_EVAL.md`](evals/BLIND_EVAL.md) for the full blind-eval procedure
+and the metadata a published model score must carry.
+
 ## Style
 
 - `SKILL.md` uses imperative form and stays under 5k words; detailed material

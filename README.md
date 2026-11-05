@@ -91,7 +91,7 @@ Honest caveat: the same author wrote both splits and saw both, so this is **not 
 
 ```bash
 python scripts/audit_claims.py --self-test     # 7/7
-python scripts/eval_extras.py --self-test      # 7/7
+python scripts/eval_extras.py --self-test      # 10/10
 python scripts/run_evals.py --split all --out evals/RESULTS.md
 python scripts/eval_extras.py --suite all --out evals/EXTRAS_RESULTS.md
 python scripts/check_docs.py
@@ -126,6 +126,23 @@ python scripts/eval_extras.py --suite trigger --predictions model_trigger.json
 The scorer accepts a JSON map of case id → list of check ids / boolean, rejects missing ids, and reports the same table with Wilson intervals. **This repo does not fabricate that score.** Feeding the gold labels back as predictions returns 1.000 — that is a scorer self-check, not an accuracy claim.
 
 CI regenerates every report and fails the PR if any golden file changes: [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+### Scoring a real model (blind)
+
+The repo ships a question sheet with **no gold labels** and an answer template
+where all 40 answers are `null` — the scorer refuses to run until every one is
+filled, so a blank sheet can never produce a plausible-looking score. See
+[`evals/BLIND_EVAL.md`](evals/BLIND_EVAL.md) for the full procedure. In short:
+
+```bash
+cp evals/predictions_template.json evals/my_predictions.json
+# give evals/blind_pack.md to a DIFFERENT model, with no access to gold labels
+python scripts/eval_extras.py --suite all --predictions evals/my_predictions.json
+```
+
+Do not run the model in the same session that wrote the gold labels, and never
+publish a number without the model name, date, temperature and a
+"non-independent evaluation" caveat.
 
 ## Known limitations
 

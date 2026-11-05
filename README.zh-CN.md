@@ -87,7 +87,7 @@ git clone https://github.com/jian935/ai-claim-audit.git ~/.claude/skills/ai-clai
 
 ```bash
 python scripts/audit_claims.py --self-test     # 7/7
-python scripts/eval_extras.py --self-test      # 7/7
+python scripts/eval_extras.py --self-test      # 10/10
 python scripts/run_evals.py --split all --out evals/RESULTS.md
 python scripts/eval_extras.py --suite all --out evals/EXTRAS_RESULTS.md
 python scripts/check_docs.py
@@ -122,6 +122,21 @@ python scripts/eval_extras.py --suite trigger --predictions model_trigger.json
 打分器接受「case id → 检查项列表／布尔值」的 JSON 映射，拒绝缺 id，并输出同样带 Wilson 区间的表。**本仓库不伪造这个分数。** 把金标当预测喂回去会得到 1.000——那是打分器自检，不是准确率声明。
 
 CI 会重新生成全部报告，任一 golden 文件变化就让 PR 变红：[`.github/workflows/ci.yml`](.github/workflows/ci.yml)。
+
+### 给真实模型打分（盲评）
+
+仓库自带一份**不含任何金标**的题目包，以及一份 40 个答案全是 `null` 的模板——
+没填完打分器直接拒绝运行，空模板不可能跑出一个看似合法的分数。完整流程见
+[`evals/BLIND_EVAL.md`](evals/BLIND_EVAL.md)，简版：
+
+```bash
+cp evals/predictions_template.json evals/my_predictions.json
+# 把 evals/blind_pack.md 交给另一个模型，不给它看任何金标
+python scripts/eval_extras.py --suite all --predictions evals/my_predictions.json
+```
+
+不要在写金标的同一个会话里跑模型，也不要发布缺少模型名、日期、temperature
+和「非独立评测」标注的数字。
 
 ## 已知局限
 

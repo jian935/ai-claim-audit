@@ -8,3 +8,7 @@ dist/
 *.egg-info/
 .pytest_cache/
 .coverage
+
+# Filled-in blind-eval answers: never commit (the blank template is tracked)
+evals/my_predictions.json
+evals/model_*.json

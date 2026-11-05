@@ -20,15 +20,18 @@ jobs:
         run: |
           python scripts/run_evals.py --split all --out evals/RESULTS.md
           python scripts/eval_extras.py --suite all --out evals/EXTRAS_RESULTS.md
+          python scripts/eval_extras.py --make-blind-pack
+          python scripts/eval_extras.py --make-template
           python scripts/audit_claims.py --input examples/bad_claims.md --out examples/audit_report.md
           python scripts/check_docs.py
 
       # No hardcoded score thresholds: a rule change that moves ANY number
       # changes the generated golden files, and this diff gate turns red.
-      # Intentional changes must regenerate and commit the goldens in the PR.
+      # Rebuilding the blind pack keeps it in sync with the eval cases, so
+      # adding a case without regenerating the question sheet also fails.
       - name: Regression gate
         run: |
-          git diff --exit-code -- evals/RESULTS.md evals/EXTRAS_RESULTS.md examples/audit_report.md
+          git diff --exit-code -- evals/RESULTS.md evals/EXTRAS_RESULTS.md evals/blind_pack.md evals/predictions_template.json examples/audit_report.md
 
       - name: Explain a failed gate
         if: failure()

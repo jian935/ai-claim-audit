@@ -15,6 +15,10 @@
 
 ## 30 秒上手
 
+![12 秒循环演示：贴一句声明，得到这个数回答不了的问题](assets/demo.gif)
+
+<sub>动图里的声明是编造的，页脚已标注；它演示交互，不是实测结果。[静态帧](assets/demo.png) · [生成脚本](scripts/make_demo.py)（Pillow，仅开发用；skill 运行时仍零依赖）。</sub>
+
 ```bash
 python scripts/audit_claims.py --text "模型准确率达到 94%，下周上线。"
 ```

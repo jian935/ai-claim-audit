@@ -19,6 +19,10 @@ A Claude Code / Agent Skill for AI product managers. It does not write your PRD 
 
 ## 30-second demo
 
+![12-second loop: paste a claim, get the questions that number cannot answer](assets/demo.gif)
+
+<sub>The claim in the animation is fabricated and labelled as such in its footer — the gif shows the interaction, not a measured result. [Static poster](assets/demo.png) · [generator](scripts/make_demo.py) (Pillow, development-only; the skill runtime stays zero-dependency).</sub>
+
 ```bash
 python scripts/audit_claims.py --text "模型准确率达到 94%，下周上线。"
 ```

@@ -152,6 +152,8 @@ publish a number without the model name, date, temperature and a
 | A rate word and an unrelated number in one sentence (`转化率…r=0.58`) | 1 false positive on C01 | Require adjacency + reverse test on `G02 H15` |
 | Chinese multipliers without Arabic numerals (`多跑三倍`, `砍掉一半`) | 2 false negatives on C05 (recall 81.8%) | Add numeral multipliers + reverse test on `G04 G05 H16` |
 
+A second probe pass (2026-11-05) found **five more defect families (R1–R5)**, frozen under the same discipline: `版本` inside "new version" is mistaken for a reproduction pointer (missed C10), a bare `让` raises a false causal flag, `显著` raises C06 on prose with no coefficient, Chinese numerals and table cells stay completely silent, and any `n=` suppresses C01 without checking arithmetic consistency. Full table in [`evals/README.md`](evals/README.md). Each needs a new `holdout-v2.json` and a reverse test — fixing them on the cases used to measure v1.0.0 would invalidate the numbers above.
+
 Also: small samples mean wide Wilson intervals; the pre-check sees only literal wording, not your dataset, labels, split or code; and a clean pre-check is **not** evidence that a claim is true. The two extra suites ship baselines and a scorer, **not** measured model-adjudication accuracy or measured trigger accuracy of a real agent harness — both need a `--predictions` run before any such number can be quoted. The CI badge reflects the latest `main` run; a red badge means a generated report changed without its golden being re-committed.
 
 ## Layout
@@ -174,6 +176,7 @@ evals/EXTRAS_RESULTS.md        generated baseline scores for the two extra suite
 evals/README.md                eval design, labelling discipline, known failures
 examples/                      fabricated input + a really generated report
 .github/workflows/ci.yml       regeneration + diff regression gate
+CHANGELOG.md                   release history and limitations at each tag
 ```
 
 ## Contributing

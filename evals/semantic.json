@@ -1,0 +1,149 @@
+{
+  "version": "1.0.0",
+  "suite": "semantic",
+  "target_set_definition": "Cases are grouped by the SEMANTIC FAILURE TYPE (target_set, label, split, definition, artifacts, slices, hidden_contradiction, compliant), not by whether the text contains a keyword. Each case carries `material`: the structured evidence a reviewer would have to be given before adjudicating C02/C03/C04/C07/C08/C11. Gold labels are human judgements of what is actually wrong, decided before running any baseline.",
+  "label_source": "Hand-written paraphrases of measurement-design mistakes; see references/failure-patterns.md. No private or submission data.",
+  "why_a_baseline": "The six semantic checks are adjudicated by a model and cannot be auto-scored by regex. A deterministic baseline over the structured material is the CONTROL GROUP: it shows what is achievable without reading the text, and leaves a measurable gap for model adjudication. To score real model output, run scripts/eval_extras.py --suite semantic --predictions <file>. This repo does not fabricate that score.",
+  "cases": [
+    {
+      "id": "S01", "category": "target_set",
+      "text": "族识别精确率 100%（n=1838，脚本 scripts/x.py，版本 v1）。",
+      "material": {"target_set_definition": "正文含该能力词的记录", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C02"], "expected_verdict": "S1",
+      "note": "Circular target set. Every machine-visible piece of evidence is present."
+    },
+    {
+      "id": "S02", "category": "label",
+      "text": "以行业搜索词为标注，准确率 44.4%（n=8674）。",
+      "material": {"target_set_definition": "岗位名", "label_source": "采集时的行业搜索词", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C03"], "expected_verdict": "S1",
+      "note": "Crawler search term is not an outcome label."
+    },
+    {
+      "id": "S03", "category": "split",
+      "text": "加了语境约束后准确率提升 13.8 个百分点。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "全量数据，未拆分", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C04"], "expected_verdict": "S1",
+      "note": "No untouched hold-out; the gain describes the tuning set."
+    },
+    {
+      "id": "S04", "category": "definition",
+      "text": "终局口径 r=-0.255，早期口径 r=-0.046，两个数都进了汇报。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": ["report_a.md", "report_b.md"], "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["dev", "holdout"]},
+      "expected_semantic_checks": ["C07"], "expected_verdict": "S1",
+      "note": "Two definitions of positive feedback survive in two documents."
+    },
+    {
+      "id": "S05", "category": "artifacts",
+      "text": "hr 族精确率 2.5%，准备删掉这批词。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": false, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C08"], "expected_verdict": "S1",
+      "note": "Deduplication by body text was never done; deleting vocabulary is the wrong fix."
+    },
+    {
+      "id": "S06", "category": "slices",
+      "text": "新增规则让任一命中率涨了 7 个点。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in"]},
+      "expected_semantic_checks": ["C11"], "expected_verdict": "S2",
+      "note": "Only the flattering slice is reported; top-1 is missing."
+    },
+    {
+      "id": "S07", "category": "target_set",
+      "text": "精确率 1.00，词表已调好。",
+      "material": {"target_set_definition": "正文含该能力词的记录", "label_source": "人工按岗位名标注", "split": "全量数据，未拆分", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C02", "C04"], "expected_verdict": "S1",
+      "note": "Two failures at once; count each once, take the highest severity."
+    },
+    {
+      "id": "S08", "category": "artifacts",
+      "text": "反诈声明没处理，某族精确率只有 3%。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": false, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C08"], "expected_verdict": "S1",
+      "note": "Boilerplate must be stripped at ingestion, not compensated for in the vocabulary."
+    },
+    {
+      "id": "S09", "category": "definition",
+      "text": "用平台队列状态当正反馈，r=0.255。",
+      "material": {"target_set_definition": "岗位名", "label_source": "平台队列状态（待联系/待笔试）", "split": "dev/holdout", "metric_definition_source": "未统一，多处硬编码", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["dev", "holdout"]},
+      "expected_semantic_checks": ["C03", "C07"], "expected_verdict": "S1",
+      "note": "Queue state is neither a human outcome nor a stable definition."
+    },
+    {
+      "id": "S10", "category": "definition",
+      "text": "我们在报告里同时写了 49% 和另一个口径的 100%。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "多处硬编码，口径不一致", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["supported/79", "supported/enumerated", "enumerated/79"]},
+      "expected_semantic_checks": ["C07"], "expected_verdict": "S1",
+      "note": "Three defensible denominators exist; reporting only the flattering one is a definition problem."
+    },
+    {
+      "id": "S11", "category": "hidden_contradiction",
+      "text": "目标集是高置信样本，精确率 98%（n=1200，脚本 scripts/a.py，版本 v3）。",
+      "material": {"target_set_definition": "高置信样本（由模型打分选出）", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C02"], "expected_verdict": "S1",
+      "note": "HIDDEN: selecting the target set by the predictor's own confidence is just as circular, but no field says '正文含'. Expected to be MISSED by the baseline."
+    },
+    {
+      "id": "S12", "category": "hidden_contradiction",
+      "text": "先在全部数据上挑词，再报告提升 13.8 个百分点。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["dev", "holdout"]},
+      "expected_semantic_checks": ["C04"], "expected_verdict": "S1",
+      "note": "HIDDEN: the material claims a split exists, but the text admits the whole set was used to choose the change. Expected to be MISSED."
+    },
+    {
+      "id": "S13", "category": "hidden_contradiction",
+      "text": "标注用的是 searched_job_title，准确率 44.4%。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C03"], "expected_verdict": "S1",
+      "note": "HIDDEN: text and material disagree. Only reading the sentence exposes it. Expected to be MISSED."
+    },
+    {
+      "id": "S14", "category": "hidden_contradiction",
+      "text": "任一命中率涨了 7 个点，top-1 没涨就没写进报告。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": ["C11"], "expected_verdict": "S2",
+      "note": "HIDDEN: two slices are declared, but the text admits only one was published. Expected to be MISSED."
+    },
+    {
+      "id": "S15", "category": "compliant",
+      "text": "在 1,167 条 JD 的留出集上，规则引擎准确率 93.6%，n=1167，脚本 scripts/real_eval_family.py，版本 2026-10-28。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": [], "expected_verdict": "OK",
+      "note": "REVERSE TEST."
+    },
+    {
+      "id": "S16", "category": "compliant",
+      "text": "相比规则基线，blend 模式任一命中率从 86.0% 到 93.4%，n=1000，增益在 dev 与留出集两边都出现。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["dev", "holdout"]},
+      "expected_semantic_checks": [], "expected_verdict": "OK",
+      "note": "REVERSE TEST."
+    },
+    {
+      "id": "S17", "category": "compliant",
+      "text": "相关系数 r=0.003（n=812，95% CI [-0.07, 0.07]），区间跨 0，因此无法认为线性相关。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["early", "terminal"]},
+      "expected_semantic_checks": [], "expected_verdict": "OK",
+      "note": "REVERSE TEST."
+    },
+    {
+      "id": "S18", "category": "compliant",
+      "text": "族识别准确率 86.0%（1,581/1,838）。",
+      "material": {"target_set_definition": "岗位名", "label_source": "采集时留下的搜索词仅用于去重，标注由人工完成", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": [], "expected_verdict": "OK",
+      "note": "REVERSE TEST with a trap: the material mentions a collection-time keyword, but only for deduplication. A shallow baseline is expected to produce a FALSE POSITIVE here."
+    },
+    {
+      "id": "S19", "category": "compliant",
+      "text": "岗位族识别精确率 92.0%。",
+      "material": {"target_set_definition": "由岗位名定义，正文含词记录仅作召回候选", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": [], "expected_verdict": "OK",
+      "note": "REVERSE TEST with a trap: the target set is defined externally; keyword hits are only recall candidates. A shallow baseline is expected to produce a FALSE POSITIVE here."
+    },
+    {
+      "id": "S20", "category": "compliant",
+      "text": "示例数据（编造）10 条全通过，n=10，脚本 scripts/demo.py。",
+      "material": {"target_set_definition": "岗位名", "label_source": "人工按岗位名标注", "split": "dev/holdout", "metric_definition_source": "reflow.py", "dedup_by_body": true, "boilerplate_stripped": true, "slices_reported": ["any-in", "top-1"]},
+      "expected_semantic_checks": [], "expected_verdict": "OK",
+      "note": "REVERSE TEST."
+    }
+  ]
+}

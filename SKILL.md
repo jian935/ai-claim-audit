@@ -109,8 +109,16 @@ applied to good and bad claims.
 | `references/failure-patterns.md` | Eleven real failure patterns and the diagnosis order |
 | `references/output-format.md` | Report template and the mandatory limitations section |
 | `evals/dev.json`, `evals/holdout.json` | 40 hand-labelled claims, 10 compliant reverse tests |
-| `evals/RESULTS.md` | Generated scores, kept mismatches, known systematic failures |
+| `evals/semantic.json` | 20 cases with structured `material` and human gold labels for the six semantic checks |
+| `evals/trigger.json` | 20 intent-labelled user messages for trigger precision |
+| `evals/RESULTS.md` | Generated main scores, kept mismatches, known systematic failures |
+| `evals/EXTRAS_RESULTS.md` | Generated baseline scores for the two extra suites; **not** model quality |
+| `scripts/eval_extras.py` | Baseline and `--predictions` scorer for both extra suites |
 | `examples/` | A fabricated input document and a real generated report |
+
+The `evals/` and CI files are development-time evaluation material. Do not
+load them while auditing a user's document. The six semantic checks are
+adjudicated from the material the user supplies, not from these test cases.
 
 ## Quick example
 

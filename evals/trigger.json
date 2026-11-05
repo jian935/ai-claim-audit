@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "suite": "trigger",
+  "target_set_definition": "Cases are labelled by USER INTENT (`intent`), never by whether the message contains a number or a trigger keyword. T11/T13/T15 contain numbers but must NOT trigger; T02/T08 contain no number but MUST trigger. `should_trigger` is a human judgement against the When-to-use / When-not-to-use sections of SKILL.md.",
+  "label_source": "Hand-written from realistic AI-PM requests. No private data.",
+  "why_a_baseline": "Trigger precision is the second axis of skill quality. A deterministic intent-hint baseline is the control group; real model triggering is scored with scripts/eval_extras.py --suite trigger --predictions <file>. This repo does not fabricate that score.",
+  "cases": [
+    {"id": "T01", "intent": "audit_claim", "should_trigger": true, "text": "这个 94% 能写进周报吗？", "note": "Classic quotability check."},
+    {"id": "T02", "intent": "review_report", "should_trigger": true, "text": "帮我看看这份评测报告有没有问题", "note": "No number in the message; intent is still an audit."},
+    {"id": "T03", "intent": "compare_reports", "should_trigger": true, "text": "两份周报的转化率对不上，哪个能信", "note": "Definition drift / mixed metric."},
+    {"id": "T04", "intent": "suspicious_metric", "should_trigger": true, "text": "准确率 100%，是不是哪里不对", "note": "Too-good metric."},
+    {"id": "T05", "intent": "audit_claim", "should_trigger": true, "text": "算法说提升 13.8 个百分点，我能引用吗", "note": "Explicit request to quote a lift."},
+    {"id": "T06", "intent": "review_report", "should_trigger": true, "text": "launch review 里的数字，帮我过一遍", "note": "HIDDEN: no Chinese audit verb. Expected to be MISSED by the baseline."},
+    {"id": "T07", "intent": "suspicious_metric", "should_trigger": true, "text": "作品集里这个 demo 数据会被面试官问穿吗", "note": "Portfolio claim review."},
+    {"id": "T08", "intent": "audit_claim", "should_trigger": true, "text": "有没有办法检查我们报的指标口径", "note": "No number; asking about metric definitions."},
+    {"id": "T09", "intent": "suspicious_metric", "should_trigger": true, "text": "这个相关系数 r=0.62 说明模型有效吗", "note": "HIDDEN: a causal leap with no audit verb. Expected to be MISSED by the baseline."},
+    {"id": "T10", "intent": "suspicious_metric", "should_trigger": true, "text": "帮我判断一下这页 PPT 的数字是不是自证", "note": "Explicit self-confirmation concern."},
+    {"id": "T11", "intent": "write_prd", "should_trigger": false, "text": "帮我写一版 PRD，目标转化率 20%", "note": "HAS A NUMBER but asks to produce a document, not audit one."},
+    {"id": "T12", "intent": "design_eval", "should_trigger": false, "text": "设计一个 A/B 实验评测方案", "note": "Designing an eval plan is explicitly out of scope."},
+    {"id": "T13", "intent": "translate", "should_trigger": false, "text": "把 94% 翻译成英文", "note": "HAS A NUMBER, unrelated intent."},
+    {"id": "T14", "intent": "verify_truth", "should_trigger": false, "text": "验证一下这个数是不是真的", "note": "Verifying factual truth is explicitly out of scope."},
+    {"id": "T15", "intent": "calculate", "should_trigger": false, "text": "帮我用 Python 算一下 62 到 89 的增长率", "note": "HAS NUMBERS, pure arithmetic."},
+    {"id": "T16", "intent": "code_task", "should_trigger": false, "text": "写一个正则匹配百分比", "note": "Coding task."},
+    {"id": "T17", "intent": "competitive_analysis", "should_trigger": false, "text": "帮我做竞品分析", "note": "Adjacent PM task, not an audit."},
+    {"id": "T18", "intent": "chitchat", "should_trigger": false, "text": "今天天气怎么样", "note": "Unrelated."},
+    {"id": "T19", "intent": "polish", "should_trigger": false, "text": "把这段周报润色得更有说服力", "note": "Asking to STRENGTHEN a claim, the opposite of auditing one."},
+    {"id": "T20", "intent": "lookup_definition", "should_trigger": false, "text": "帮我查一下这个指标口径定义在哪", "note": "TRAP: contains audit-ish words but the intent is to locate a definition. A shallow baseline is expected to produce a FALSE POSITIVE here."}
+  ]
+}

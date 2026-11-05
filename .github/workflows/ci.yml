@@ -1,0 +1,37 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  regression-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Self-tests
+        run: |
+          python scripts/audit_claims.py --self-test
+          python scripts/eval_extras.py --self-test
+
+      - name: Regenerate every report
+        run: |
+          python scripts/run_evals.py --split all --out evals/RESULTS.md
+          python scripts/eval_extras.py --suite all --out evals/EXTRAS_RESULTS.md
+          python scripts/audit_claims.py --input examples/bad_claims.md --out examples/audit_report.md
+          python scripts/check_docs.py
+
+      # No hardcoded score thresholds: a rule change that moves ANY number
+      # changes the generated golden files, and this diff gate turns red.
+      # Intentional changes must regenerate and commit the goldens in the PR.
+      - name: Regression gate
+        run: |
+          git diff --exit-code -- evals/RESULTS.md evals/EXTRAS_RESULTS.md examples/audit_report.md
+
+      - name: Explain a failed gate
+        if: failure()
+        run: |
+          echo "A generated report changed. Inspect the diff above."
+          echo "If the change is intentional, regenerate the goldens and commit them in this PR."

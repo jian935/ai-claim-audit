@@ -49,14 +49,26 @@ All three must survive the same discipline this skill audits other people by.
 - `semantic_checks` are documentation for human review; they are not scored.
 - Write the `note` before running the script, so the label is not derived from
   the script's output.
+- For `semantic.json`, include the full `material` object and set
+  `expected_verdict`; for `trigger.json`, set `intent` and `should_trigger`.
+  Both files are scored by `scripts/eval_extras.py`, and every case id must
+  appear in any `--predictions` file.
 
 ## Before opening a PR
 
 ```bash
 python scripts/audit_claims.py --self-test
+python scripts/eval_extras.py --self-test
 python scripts/run_evals.py --split all --out evals/RESULTS.md
+python scripts/eval_extras.py --suite all --out evals/EXTRAS_RESULTS.md
 python scripts/check_docs.py
 ```
+
+CI re-runs all of the above, then `git diff --exit-code` on the three generated
+reports (`evals/RESULTS.md`, `evals/EXTRAS_RESULTS.md`,
+`examples/audit_report.md`). Any change to a rule or a case moves a golden
+file and turns the PR red. Never hand-edit a golden file to make CI green:
+regenerate it, inspect the diff, and commit it as part of the change.
 
 If `evals/RESULTS.md` changed, paste the new table into both READMEs and keep
 dev, hold-out and all three rows. If a new systematic failure appears, add a

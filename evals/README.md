@@ -112,6 +112,42 @@ Both are covered by the seventh self-test assertion. Verification: regenerated
 `evals/RESULTS.md` and `examples/audit_report.md` must be byte-identical to the
 pre-fix versions.
 
+## Extra suites: semantic adjudication and trigger precision
+
+Added 2026-11-05 to close two gaps the main 40-case set cannot cover.
+
+| File | Cases | Gold label | Reverse tests |
+|---|---|---|---|
+| `semantic.json` | 20 | human labels over `C02 C03 C04 C07 C08 C11`, each with structured `material` a reviewer would need | 6 compliant, including 2 traps |
+| `trigger.json` | 20 | human `should_trigger` by user intent | 10 must-not-trigger, including 1 trap |
+
+Target sets are labelled by category/intent, never by keyword: `T11`/`T13`/`T15`
+contain numbers but must not trigger; `T02`/`T08` contain no number but must.
+Four `hidden_contradiction` cases (`S11`–`S14`) have clean-looking material
+while the claim text admits the flaw — the baseline cannot read the text, so
+they are expected misses.
+
+**What is scored by default:** a deterministic baseline over structured fields
+and intent hints. It is a control group. Results (semantic F1 `0.800`, trigger
+F1 `0.842`) are generated into `EXTRAS_RESULTS.md`. They are NOT model
+adjudication accuracy and NOT the trigger accuracy of any real agent harness.
+
+**Scoring real model output:**
+
+```bash
+python scripts/eval_extras.py --suite semantic --predictions model_semantic.json
+python scripts/eval_extras.py --suite trigger --predictions model_trigger.json
+```
+
+The predictions file maps every case id to a list of check ids / a boolean;
+missing ids are rejected rather than silently counted as negatives. Feeding
+the gold labels back returns 1.000 — a scorer self-check, never a published
+accuracy figure. Do not put that number in a README.
+
+Labelling a new extra-suite case follows the same discipline as the main set:
+write the `note` before running any baseline, keep the compliant traps, and
+never patch a rule on the cases used to measure it.
+
 ## Adding a case
 
 Add to `dev.json` only while rules are still being designed, or to a new

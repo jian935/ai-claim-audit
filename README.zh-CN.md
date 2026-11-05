@@ -2,9 +2,12 @@
 
 **把任何一句带数字的 AI 产品声明丢进来，得到一张表：这个数字到底回答不了哪些问题。**
 
-[English README](README.md) · [MIT](LICENSE) · Python 3.10+ · 零依赖 · 40 条人工标注
+[![CI](https://github.com/jian935/ai-claim-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/jian935/ai-claim-audit/actions/workflows/ci.yml)
+[English README](README.md) · [MIT](LICENSE) · Python 3.10+ · 零依赖 · 80 条人工标注
 
 > 在 **40 条人工标注声明**上，确定性预检的**声明检出率 80.0%**（95% CI 62.7–90.5）、**micro-F1 0.948**，对 10 条合规声明**误报 0/10**。剩下 20% 是正则看不见的语义问题——这个缺口正是本 skill 存在的理由。完整数字、置信区间和全部保留的错误见 [`evals/RESULTS.md`](evals/RESULTS.md)。
+>
+> 另有两套评测补上另外两个缺口：**20 条语义裁决案例**（基线 **F1 0.800**）与 **20 条触发精度案例**（基线 **F1 0.842**）。这些是**对照基线，不是模型分数**；真实模型输出用 `--predictions` 打分。见 [`evals/EXTRAS_RESULTS.md`](evals/EXTRAS_RESULTS.md)。
 
 这是一个给 AI 产品经理用的 Agent Skill。它不替你写 PRD，也不替你设计评测方案；它只读你已经写出来的数字，然后问一句：**要想相信它，我还需要看到什么？**
 
@@ -61,9 +64,11 @@ git clone https://github.com/jian935/ai-claim-audit.git ~/.claude/skills/ai-clai
 | PRD／路线图／RICE／JTBD／竞品分析合集，含 70 个 skill 的大合集与 466 个 skill 的跨职业目录 | 不生成任何文档 |
 | 覆盖规则→RAG→Agent 选型、证伪式 POC、四层 eval、上线闸门的 AI PM 判断力 skill | 不决定做什么 |
 | 至少 4 个 `ai-eval-plan` / `eval-framework-builder` 类 skill | 不设计评测方案 |
-| 上述几乎全是纯 Markdown 提示词模板 | 带可运行零依赖脚本、40 条标注、跑分器与自动生成的结果表 |
+| 上述几乎全是纯 Markdown 提示词模板 | 带可运行零依赖脚本、80 条标注、三个跑分器与自动生成的结果表 |
 
 留的缝是有意收窄的：**没人审这些流程最后产出的那串数字。** 一个 skill、一个动作、一句话说得清。
+
+触发精度方向有零星通用检查器（2026-11-05 查到 4 个仓库、最高 2★），但没有本垂直场景的标注集；指标契约／口径漂移工具确实存在（`jigonyoo/metrics-contract`、`vermapragya/open-metric-contracts`），本仓库审的是**声明文本**，不是 dashboard SQL。
 
 ## 怎么避免「审别人自证，自己却自证」
 
@@ -74,6 +79,7 @@ git clone https://github.com/jian935/ai-claim-audit.git ~/.claude/skills/ai-clai
 3. **四条故意让机器看不见的坏例。** `D15`–`D17`、`H11` 是真有问题的声明（循环目标集、用采集搜索词当标注、混口径），但机器金标为**空**。预检对四条全部静默，并计入声明级漏检。
 4. **先冻结，再写留出集。** 规则在 `dev.json`（24 条，检出率 77.8%，F1 0.966）上设计完即冻结 `scripts/audit_claims.py`，之后才写措辞不同的 `holdout.json`（16 条）：精确率从 **96.6% 掉到 90.0%**。这个下滑如实报告，没有偷偷修掉。
 5. **错误留着不修。** 3 个误报、2 个漏检都保留在 `RESULTS.md`，三类系统性成因写在 [`evals/README.md`](evals/README.md)；10 条合规声明作反向测试（误报 0/10）。
+6. **新增两套评测也埋了陷阱。** `S18`、`S19`、`T20` 是故意让浅层基线出错的合规案例；`S11`–`S14`、`T06`、`T09` 是设计成会被漏掉的正例。
 
 诚实说明：两个文件由同一作者编写且都看过，**不是严格意义的独立留出集**，只能算对措辞过拟合的弱防护。
 
@@ -81,7 +87,10 @@ git clone https://github.com/jian935/ai-claim-audit.git ~/.claude/skills/ai-clai
 
 ```bash
 python scripts/audit_claims.py --self-test     # 7/7
+python scripts/eval_extras.py --self-test      # 7/7
 python scripts/run_evals.py --split all --out evals/RESULTS.md
+python scripts/eval_extras.py --suite all --out evals/EXTRAS_RESULTS.md
+python scripts/check_docs.py
 ```
 
 | 拆分 | 条数 | 坏例 | 合规 | TP | FP | FN | 精确率 [95% CI] | 召回 [95% CI] | F1 | 声明检出率 [95% CI] | 误报 |
@@ -90,7 +99,29 @@ python scripts/run_evals.py --split all --out evals/RESULTS.md
 | holdout | 16 | 12 | 4 | 18 | 2 | 1 | 90.0% [69.9, 97.2] | 94.7% [75.4, 99.1] | 0.923 | 83.3% [55.2, 95.3] | 0/4 |
 | **全部** | **40** | **30** | **10** | **46** | **3** | **2** | **93.9% [83.5, 97.9]** | **95.8% [86.0, 98.8]** | **0.948** | **80.0% [62.7, 90.5]** | **0/10** |
 
-声明检出率刻意低于 micro 指标：语义型坏例的机器金标为空，预检「正确但静默」也算漏检。6 项语义检查**不自动打分**，本仓库对模型裁决质量不作任何声明。
+声明检出率刻意低于 micro 指标：语义型坏例的机器金标为空，预检「正确但静默」也算漏检。
+
+## 另外两套评测
+
+主表只覆盖 6 项确定性检查。新增两套补上 skill 质量的另外两轴：语义裁决与触发精度。两者都按**意图／类型**标注，不按关键词：`T11`/`T13`/`T15` 有数字但不该触发，`T02`/`T08` 没有数字却该触发。
+
+| 评测集 | 条数 | 精确率 [95% CI] | 召回 [95% CI] | F1 | 检出率 [95% CI] | 误报 |
+|---|---|---|---|---|---|---|
+| 语义基线 | 20 | 85.7% [60.1, 96.0] | 75.0% [50.5, 89.8] | **0.800** | 71.4% [45.4, 88.3] | 2/6 |
+| 触发基线 | 20 | 88.9% [56.5, 98.0] | 80.0% [49.0, 94.3] | **0.842** | 80.0% [49.0, 94.3] | 1/10 |
+
+**这些是基线，不是模型质量。** 语义基线只读结构化的 `material` 字段、从不读声明正文；四条 `hidden_contradiction` 案例（`S11`–`S14`）就是为了让它的召回停在 75.0%。触发基线只是几条意图提示词；两条应触发消息不含任何提示词，一条不该触发的消息反而含两个。合规陷阱（`S18`、`S19`、`T20`）刻意制造误报。
+
+给真实模型输出打分：
+
+```bash
+python scripts/eval_extras.py --suite semantic --predictions model_semantic.json
+python scripts/eval_extras.py --suite trigger --predictions model_trigger.json
+```
+
+打分器接受「case id → 检查项列表／布尔值」的 JSON 映射，拒绝缺 id，并输出同样带 Wilson 区间的表。**本仓库不伪造这个分数。** 把金标当预测喂回去会得到 1.000——那是打分器自检，不是准确率声明。
+
+CI 会重新生成全部报告，任一 golden 文件变化就让 PR 变红：[`.github/workflows/ci.yml`](.github/workflows/ci.yml)。
 
 ## 已知局限
 
@@ -100,7 +131,7 @@ python scripts/run_evals.py --split all --out evals/RESULTS.md
 | 率词与无关数字同句（`转化率…r=0.58`） | C01 误报 1 条 | 要求数字紧邻率词 + 对 `G02 H15` 做反向测试 |
 | 汉字倍数无阿拉伯数字（`多跑三倍`、`砍掉一半`） | C05 漏检 2 条（召回 81.8%） | 补汉字倍数 + 对 `G04 G05 H16` 做反向测试 |
 
-另外：样本小、Wilson 区间宽；预检只看字面，看不到你的数据集、标签、拆分和代码里的口径；预检干净**不等于**声明为真。
+另外：样本小、Wilson 区间宽；预检只看字面，看不到你的数据集、标签、拆分和代码里的口径；预检干净**不等于**声明为真。两套新增评测提供的是基线与打分器，**不是**已实测的模型裁决准确率或真实 agent 的触发准确率——要引用这类数字，必须先跑一次 `--predictions`。CI 徽章在首次推送 GitHub 后才会亮。
 
 ## 目录
 
@@ -108,14 +139,20 @@ python scripts/run_evals.py --split all --out evals/RESULTS.md
 SKILL.md                       skill 入口与工作流
 scripts/audit_claims.py        零依赖预检，md/json 输出，--self-test
 scripts/run_evals.py           dev/留出集跑分，含 Wilson 区间
+scripts/eval_extras.py         语义 + 触发基线，--predictions 打分器
+scripts/check_docs.py          中英 README 数字对称锁
 references/audit-rubric.md     12 项检查、合格证据、严重度
 references/failure-patterns.md 11 个真实踩坑与诊断顺序
 references/output-format.md    报告模板与必写的局限段
 evals/dev.json                 24 条标注（用于设计规则）
 evals/holdout.json             16 条标注（冻结后编写）
-evals/RESULTS.md               自动生成的结果与保留的错误
+evals/semantic.json            20 条带结构化材料与人评金标
+evals/trigger.json             20 条按意图标注的用户消息
+evals/RESULTS.md               自动生成的主评测结果与保留的错误
+evals/EXTRAS_RESULTS.md        自动生成的两套基线结果
 evals/README.md                评测口径、标注纪律、已知缺陷
 examples/                      编造的输入 + 真实生成的报告
+.github/workflows/ci.yml       重生成 + diff 回归门
 ```
 
 ## 贡献

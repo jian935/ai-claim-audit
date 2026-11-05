@@ -152,7 +152,7 @@ publish a number without the model name, date, temperature and a
 | A rate word and an unrelated number in one sentence (`转化率…r=0.58`) | 1 false positive on C01 | Require adjacency + reverse test on `G02 H15` |
 | Chinese multipliers without Arabic numerals (`多跑三倍`, `砍掉一半`) | 2 false negatives on C05 (recall 81.8%) | Add numeral multipliers + reverse test on `G04 G05 H16` |
 
-Also: small samples mean wide Wilson intervals; the pre-check sees only literal wording, not your dataset, labels, split or code; and a clean pre-check is **not** evidence that a claim is true. The two extra suites ship baselines and a scorer, **not** measured model-adjudication accuracy or measured trigger accuracy of a real agent harness — both need a `--predictions` run before any such number can be quoted. The CI badge goes live after the first push to GitHub.
+Also: small samples mean wide Wilson intervals; the pre-check sees only literal wording, not your dataset, labels, split or code; and a clean pre-check is **not** evidence that a claim is true. The two extra suites ship baselines and a scorer, **not** measured model-adjudication accuracy or measured trigger accuracy of a real agent harness — both need a `--predictions` run before any such number can be quoted. The CI badge reflects the latest `main` run; a red badge means a generated report changed without its golden being re-committed.
 
 ## Layout
 

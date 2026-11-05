@@ -63,6 +63,27 @@ dev, hold-out and all three rows. If a new systematic failure appears, add a
 row to `evals/README.md` instead of quietly fixing it on the same cases used
 to measure it.
 
+## Release packaging
+
+Never use a generic recursive packager once this folder is a git repository.
+During the 2026-11-05 checkup one walked `.git/` and shipped 47 history
+objects in a 65-entry zip (the correct release has 18 entries). Build the
+release zip from tracked files only:
+
+```bash
+python - <<'PY'
+import zipfile, subprocess
+files = subprocess.check_output(["git", "ls-files"], text=True).splitlines()
+with zipfile.ZipFile("ai-claim-audit.zip", "w", zipfile.ZIP_DEFLATED) as z:
+    for f in files:
+        z.write(f, "ai-claim-audit/" + f)
+print(len(files), "files, no .git, no __pycache__")
+PY
+```
+
+Validate the skill structure separately; validation and packaging are two
+different jobs.
+
 ## Style
 
 - `SKILL.md` uses imperative form and stays under 5k words; detailed material

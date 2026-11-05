@@ -1,0 +1,170 @@
+{
+  "version": "1.0.0",
+  "split": "dev",
+  "target_set_definition": "Cases are grouped by the TYPE OF CLAIM (the `category` field: accuracy_claim, lift_claim, correlation_claim, eval_design_claim, synthetic_claim, reproducibility_claim, causal_claim, cost_claim, compliant). The target set is NEVER defined by whether the text contains a keyword. `expected_machine_checks` is a human judgement of which of the six deterministic checks a careful reviewer should raise, decided from what evidence the sentence actually supplies — not from what the current script happens to fire on. `compliant` cases are the reverse test: a sentence that supplies the evidence and must NOT be flagged.",
+  "label_source": "Hand-written from recurring failure patterns in AI product docs; see references/failure-patterns.md. Paraphrased, no private or submission data.",
+  "cases": [
+    {
+      "id": "D01", "split": "dev", "category": "accuracy_claim",
+      "text": "模型准确率达到 94%，下周上线。",
+      "expected_machine_checks": ["C01", "C10"],
+      "semantic_checks": [],
+      "note": "No denominator, no way to re-run."
+    },
+    {
+      "id": "D02", "split": "dev", "category": "accuracy_claim",
+      "text": "族识别精确率 100%，说明词表已经调好了。",
+      "expected_machine_checks": ["C01", "C10"],
+      "semantic_checks": ["C02", "C04"],
+      "note": "A perfect score usually means the target set was built from the thing being detected."
+    },
+    {
+      "id": "D03", "split": "dev", "category": "lift_claim",
+      "text": "新版本让任务完成率从 62% 提升到 89%。",
+      "expected_machine_checks": ["C01", "C05", "C12"],
+      "semantic_checks": [],
+      "note": "No comparator named, causal verb, no denominator."
+    },
+    {
+      "id": "D04", "split": "dev", "category": "lift_claim",
+      "text": "加了语境约束后，族识别准确率提升了 13.8 个百分点。",
+      "expected_machine_checks": ["C01", "C05", "C10"],
+      "semantic_checks": ["C04", "C11"],
+      "note": "Classic tuning-set gain; no hold-out, no other slice reported."
+    },
+    {
+      "id": "D05", "split": "dev", "category": "correlation_claim",
+      "text": "匹配分与实际回复的相关系数 r=0.62，证明匹配模型有效。",
+      "expected_machine_checks": ["C06"],
+      "semantic_checks": ["C12", "C07"],
+      "note": "No n or interval; a correlation used to assert the model works. The causal part is a semantic call the machine check cannot make."
+    },
+    {
+      "id": "D06", "split": "dev", "category": "correlation_claim",
+      "text": "上线后面试率提升了 13 个百分点，相关系数 r=0.62。",
+      "expected_machine_checks": ["C01", "C05", "C06"],
+      "semantic_checks": ["C07"],
+      "note": "Before/after with no control, plus an unexplained coefficient."
+    },
+    {
+      "id": "D07", "split": "dev", "category": "eval_design_claim",
+      "text": "我们在 200 条样本上做了评测，准确率 93.6%。",
+      "expected_machine_checks": ["C10"],
+      "semantic_checks": ["C04"],
+      "note": "Denominator IS given (200 samples), so C01 must not fire. Still not reproducible."
+    },
+    {
+      "id": "D08", "split": "dev", "category": "synthetic_claim",
+      "text": "示例数据里 10 条全部通过，效果稳定，可以直接对外引用。",
+      "expected_machine_checks": ["C09"],
+      "semantic_checks": [],
+      "note": "Undisclosed demo data about to migrate into an external claim."
+    },
+    {
+      "id": "D09", "split": "dev", "category": "synthetic_claim",
+      "text": "演示报告中投递 60 家、面试率 21%，转化提升明显。",
+      "expected_machine_checks": ["C01", "C05", "C09"],
+      "semantic_checks": [],
+      "note": "Demo numbers quoted with no disclosure and no comparator."
+    },
+    {
+      "id": "D10", "split": "dev", "category": "reproducibility_claim",
+      "text": "实测英文数据集上族识别 93.6%，中文数据集 86.0%，与英文并列。",
+      "expected_machine_checks": ["C01", "C10"],
+      "semantic_checks": ["C07"],
+      "note": "Naming a dataset is not a reproduction pointer; no version, no script, no n."
+    },
+    {
+      "id": "D11", "split": "dev", "category": "causal_claim",
+      "text": "新推荐策略带来面试率 2.6 倍增长。",
+      "expected_machine_checks": ["C05", "C12"],
+      "semantic_checks": ["C07"],
+      "note": "Causal verb, no control group."
+    },
+    {
+      "id": "D12", "split": "dev", "category": "accuracy_claim",
+      "text": "人工标注 45 条真实 JD，族识别准确率 100%。",
+      "expected_machine_checks": ["C10"],
+      "semantic_checks": ["C02", "C04"],
+      "note": "Denominator IS present in natural Chinese wording ('45 条真实 JD'). A regex that misses it is a genuine false positive, and is scored as one."
+    },
+    {
+      "id": "D13", "split": "dev", "category": "accuracy_claim",
+      "text": "岗位族识别准确率 86.0%（1,581/1,838）。",
+      "expected_machine_checks": ["C10"],
+      "semantic_checks": [],
+      "note": "Fraction form is a valid denominator; still no reproduction pointer."
+    },
+    {
+      "id": "D14", "split": "dev", "category": "lift_claim",
+      "text": "A/B 实验显示新模型让点击率提升 12%，p<0.05。",
+      "expected_machine_checks": ["C01", "C10", "C12"],
+      "semantic_checks": ["C04"],
+      "note": "A/B supplies the control and p<0.05 supplies uncertainty, so C05/C06 must NOT fire. The causal verb still needs hedging."
+    },
+    {
+      "id": "D15", "split": "dev", "category": "eval_design_claim",
+      "text": "目标集取正文里含该能力词的记录，精确率 1.00（n=1838，脚本 scripts/x.py，版本 v1）。",
+      "expected_machine_checks": [],
+      "semantic_checks": ["C02"],
+      "note": "SEMANTIC-ONLY: every machine-visible piece of evidence is present, yet the measurement is circular. A regex pre-check cannot see this. This is the single most important case in the set."
+    },
+    {
+      "id": "D16", "split": "dev", "category": "eval_design_claim",
+      "text": "以采集时的行业搜索词作标注，族识别准确率 44.4%（n=8674，复现脚本 scripts/y.py）。",
+      "expected_machine_checks": [],
+      "semantic_checks": ["C03"],
+      "note": "SEMANTIC-ONLY: the label column is a crawler search term, not an outcome."
+    },
+    {
+      "id": "D17", "split": "dev", "category": "eval_design_claim",
+      "text": "终局口径下 r=-0.255（n=60，95% CI [-0.5, 0.0]），早期口径下 r=-0.046，两个数都写进汇报。",
+      "expected_machine_checks": [],
+      "semantic_checks": ["C07"],
+      "note": "SEMANTIC-ONLY: both numbers are well-formed; the problem is a mixed definition across reports."
+    },
+    {
+      "id": "D18", "split": "dev", "category": "cost_claim",
+      "text": "同样预算下能多跑三倍请求。",
+      "expected_machine_checks": ["C05"],
+      "semantic_checks": [],
+      "note": "Chinese multiplier phrasing with no Arabic numeral. Labelled as a lift claim by a human; expected to be MISSED by the pre-check (a real false negative)."
+    },
+    {
+      "id": "G01", "split": "dev", "category": "compliant",
+      "text": "在 1,167 条 JD 的留出集上，规则引擎的岗位族识别准确率为 93.6%，n=1167，复现脚本 scripts/real_eval_family.py，数据版本 2026-10-28。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: denominator, hold-out, script and version all stated."
+    },
+    {
+      "id": "G02", "split": "dev", "category": "compliant",
+      "text": "在 2,000 条配对上，匹配分与实际回复的 Pearson r=0.193，n=2000，95% 置信区间 [-0.15, 0.21]，区间跨 0，因此不能认为两者相关。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: interval reported and the conclusion is hedged correctly."
+    },
+    {
+      "id": "G03", "split": "dev", "category": "compliant",
+      "text": "相比规则基线，blend 模式把任一命中率从 86.0% 提升到 93.4%，n=1000；增益在 dev 与留出集两边都出现，评测脚本 scripts/measure_split.py。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: named baseline, denominator, both splits, reproduction script."
+    },
+    {
+      "id": "G04", "split": "dev", "category": "compliant",
+      "text": "示例数据（编造，仅用于演示格式）里 10 条全部通过，为什么它好看：所有样例都由同一模板生成。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: synthetic data explicitly disclosed and explained."
+    },
+    {
+      "id": "G05", "split": "dev", "category": "compliant",
+      "text": "示例数据（编造，说明它为什么好看：模板生成）显示 10 条全通过，n=10，复现脚本 scripts/demo.py。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: disclosure plus reproduction pointer."
+    },
+    {
+      "id": "G06", "split": "dev", "category": "compliant",
+      "text": "相比上一版，A/B 实验里准确率从 86.0% 提升到 93.4%，n=1000，95% CI [1.2, 6.8]，脚本 scripts/ab.py，数据版本 2026-11-01。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: baseline, control, denominator, interval, script, version."
+    }
+  ]
+}

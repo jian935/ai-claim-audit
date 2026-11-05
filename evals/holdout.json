@@ -1,0 +1,117 @@
+{
+  "version": "1.0.0",
+  "split": "holdout",
+  "written_after": "The regex rules in scripts/audit_claims.py were frozen after the dev run (dev: TP=28 FP=1 FN=1, claim detection 77.8%). No rule was edited while writing this file.",
+  "target_set_definition": "Same as dev.json: cases are grouped by claim TYPE, never by keyword presence. Wording is intentionally different from dev so that a rule tuned to dev phrasing does not automatically pass. Gold labels are human judgements of what evidence the sentence supplies.",
+  "label_source": "Hand-written paraphrases of recurring AI-product reporting mistakes; no private or submission data.",
+  "cases": [
+    {
+      "id": "H01", "split": "holdout", "category": "accuracy_claim",
+      "text": "新版召回率 91.2%，已经可以全量放量。",
+      "expected_machine_checks": ["C01", "C10"],
+      "semantic_checks": ["C04"],
+      "note": "No denominator, no reproduction pointer, no hold-out mentioned."
+    },
+    {
+      "id": "H02", "split": "holdout", "category": "accuracy_claim",
+      "text": "评测集上 F1 为 87.0%，效果符合预期。",
+      "expected_machine_checks": ["C01", "C10"],
+      "semantic_checks": [],
+      "note": "A rate with no n and no way to re-run."
+    },
+    {
+      "id": "H03", "split": "holdout", "category": "lift_claim",
+      "text": "接入缓存之后 p95 延迟下降 40%。",
+      "expected_machine_checks": ["C01", "C05"],
+      "semantic_checks": [],
+      "note": "Before/after implied, but no comparator named and no sample size."
+    },
+    {
+      "id": "H04", "split": "holdout", "category": "lift_claim",
+      "text": "prompt 改写把拒答率压到 3%，用户投诉随之减少 20%。",
+      "expected_machine_checks": ["C01", "C05"],
+      "semantic_checks": ["C12"],
+      "note": "Two deltas, no baseline, no denominator."
+    },
+    {
+      "id": "H05", "split": "holdout", "category": "correlation_claim",
+      "text": "评分和 offer 数量的相关系数是 0.31，说明打分器选对了。",
+      "expected_machine_checks": ["C06"],
+      "semantic_checks": ["C12"],
+      "note": "Coefficient with no n or interval; the leap to 'the scorer is right' is semantic."
+    },
+    {
+      "id": "H06", "split": "holdout", "category": "correlation_claim",
+      "text": "显著提升了转化率，r=0.58。",
+      "expected_machine_checks": ["C05", "C06"],
+      "semantic_checks": [],
+      "note": "'显著' with no test, plus an unexplained coefficient and no comparator."
+    },
+    {
+      "id": "H07", "split": "holdout", "category": "eval_design_claim",
+      "text": "50 条人工标注上准确率 92.0%，数据来自上周那次跑分。",
+      "expected_machine_checks": ["C10"],
+      "semantic_checks": ["C04"],
+      "note": "Denominator IS given; naming 'last week's run' is not a reproduction pointer."
+    },
+    {
+      "id": "H08", "split": "holdout", "category": "synthetic_claim",
+      "text": "给投资人看的演示里，10 家客户全都续费了。",
+      "expected_machine_checks": ["C09"],
+      "semantic_checks": [],
+      "note": "Undisclosed demo framed as an external-facing result."
+    },
+    {
+      "id": "H09", "split": "holdout", "category": "synthetic_claim",
+      "text": "示例输出显示失败率 0%，可以直接贴进周报。",
+      "expected_machine_checks": ["C01", "C09"],
+      "semantic_checks": [],
+      "note": "Perfect score on an undisclosed example, about to be quoted as real."
+    },
+    {
+      "id": "H10", "split": "holdout", "category": "causal_claim",
+      "text": "上线知识库后使得人工转接率下降 18 个百分点。",
+      "expected_machine_checks": ["C01", "C05", "C12"],
+      "semantic_checks": ["C07"],
+      "note": "Causal verb, no comparator, no denominator."
+    },
+    {
+      "id": "H11", "split": "holdout", "category": "eval_design_claim",
+      "text": "正例定义为模型预测为 A 的样本，A 类精确率 98.0%（n=1200，脚本 scripts/a.py，版本 v3）。",
+      "expected_machine_checks": [],
+      "semantic_checks": ["C02"],
+      "note": "SEMANTIC-ONLY, different wording from D15: the target set is defined by the predictor's own output. Every machine-visible piece of evidence is present."
+    },
+    {
+      "id": "H12", "split": "holdout", "category": "cost_claim",
+      "text": "换小模型让单次成本砍掉一半。",
+      "expected_machine_checks": ["C05"],
+      "semantic_checks": [],
+      "note": "Chinese multiplier with no Arabic numeral, no named baseline. Expected to be MISSED by the pre-check."
+    },
+    {
+      "id": "H13", "split": "holdout", "category": "compliant",
+      "text": "在 45 条人工标注的真实 JD 上，有语境约束版准确率 100.0%，n=45，评测脚本 scripts/cn_eval_family.py，数据版本 2026-10-30。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: denominator, script, version."
+    },
+    {
+      "id": "H14", "split": "holdout", "category": "compliant",
+      "text": "相比纯规则基线，LLM 混合模式任一命中率由 86.0% 升至 93.4%，n=1000，增益在 dev 与留出集均出现，脚本 scripts/measure_split.py，版本 v0.8.7。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: baseline, n, both splits, script, version."
+    },
+    {
+      "id": "H15", "split": "holdout", "category": "compliant",
+      "text": "相关系数 r=0.003（n=812，95% 置信区间 [-0.07, 0.07]，区间跨 0），因此无法认为预测分与终局结果线性相关。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: interval reported, conclusion correctly hedged."
+    },
+    {
+      "id": "H16", "split": "holdout", "category": "compliant",
+      "text": "示例数据为编造的示意数据，10 条全通过只是因为模板固定，复现脚本 scripts/demo.py，n=10。",
+      "expected_machine_checks": [], "semantic_checks": [],
+      "note": "REVERSE TEST: synthetic disclosure plus an explanation of why it looks good."
+    }
+  ]
+}

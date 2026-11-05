@@ -60,7 +60,7 @@ def load_cases(split: str) -> list[dict]:
 
 def evaluate(cases: list[dict]) -> dict:
     per = {c: {"tp": 0, "fp": 0, "fn": 0} for c in MACHINE_CHECKS}
-    tp = fp = fn = tn = 0
+    tp = fp = fn = 0
     flawed: list[tuple[dict, set[str]]] = []
     compliant: list[tuple[dict, set[str]]] = []
     mismatches: list[dict] = []
@@ -84,8 +84,6 @@ def evaluate(cases: list[dict]) -> dict:
             elif not p and g:
                 per[cid]["fn"] += 1
                 fn += 1
-            else:
-                tn += 1
         if pred != gold:
             mismatches.append({
                 "id": case["id"],
@@ -103,16 +101,17 @@ def evaluate(cases: list[dict]) -> dict:
 
     detected = sum(1 for _, p in flawed if p)
     false_alarms = sum(1 for _, p in compliant if p)
-    semantic_only = [c for c, _ in flawed if not c["expected_machine_checks"]]
-    semantic_only_hit = [c for c, p in flawed
-                         if not c["expected_machine_checks"] and p]
+    semantic_only_flawed = sum(1 for c, _ in flawed
+                               if not c["expected_machine_checks"])
+    semantic_only_detected = sum(1 for c, p in flawed
+                                 if not c["expected_machine_checks"] and p)
 
     return {
         "cases": len(cases),
         "flawed": len(flawed),
         "compliant": len(compliant),
-        "semantic_only_flawed": len(semantic_only),
-        "TP": tp, "FP": fp, "FN": fn, "TN": tn,
+        "semantic_only_flawed": semantic_only_flawed,
+        "TP": tp, "FP": fp, "FN": fn,
         "precision": prec,
         "precision_ci": wilson(tp, tp + fp),
         "recall": rec,
@@ -123,7 +122,7 @@ def evaluate(cases: list[dict]) -> dict:
         "claim_detection_ci": wilson(detected, len(flawed)),
         "false_alarm_rate": false_alarms / len(compliant) if compliant else float("nan"),
         "false_alarm_k": false_alarms,
-        "semantic_only_detected": len(semantic_only_hit),
+        "semantic_only_detected": semantic_only_detected,
         "per_check": per,
         "mismatches": mismatches,
     }

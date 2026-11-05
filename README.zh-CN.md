@@ -80,7 +80,7 @@ git clone https://github.com/jian935/ai-claim-audit.git ~/.claude/skills/ai-clai
 ## 评测结果
 
 ```bash
-python scripts/audit_claims.py --self-test     # 6/6
+python scripts/audit_claims.py --self-test     # 7/7
 python scripts/run_evals.py --split all --out evals/RESULTS.md
 ```
 

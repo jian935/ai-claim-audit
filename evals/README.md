@@ -85,6 +85,33 @@ Planned reverse tests for v1.1:
 Do not change a rule to chase a single failing case before simulating how many
 misses the change can actually recover. If the ceiling is zero, stop.
 
+## Findings from the 2026-11-05 checkup (not patched)
+
+A full probe pass found five more defects. **None was patched in place.** The
+v1.0.0 rules in `precheck_claim` are frozen; changing them on the same cases
+used to measure them would invalidate the table above. Each item needs a new
+`holdout-v2.json` and a reverse test before it can ship.
+
+| ID | Probe | Observed | Type |
+|---|---|---|---|
+| R1 | `新版本准确率 94%。` | only C01 raised; C10 missed | `版本` inside `REPRO_EVIDENCE` treats "new version" as a reproduction pointer |
+| R2 | `让用户自己选择 3 个标签。` | C12 raised | single character `让` is too broad a causal trigger |
+| R3 | `效果显著，转化率不错。` | C06 raised | `显著` inside `CORR` fires on prose with no coefficient |
+| R4 | `百分之九十四的请求都成功了。` / a table cell with Chinese numerals | completely silent | no Arabic numeral, and `split_claims` requires a digit in table cells |
+| R5 | `准确率 94%，n=5。` | C01 suppressed | any `n=` counts as a denominator even when it is arithmetically inconsistent with the percentage |
+
+Planned reverse tests: R1 must keep `G01 G06 H13 H14` clean; R2 must keep
+`D03 H10` firing; R3 must keep `D06 H05 H06` firing; R4 must keep `G02 H15`
+clean; R5 needs a numeric-consistency check with its own cases.
+
+Two non-rule fixes **were** applied in the same checkup because they do not
+touch `precheck_claim` and therefore cannot move any score: English sentence
+splitting (`Accuracy 94%. Cost dropped 30%.` now yields two claims) and a
+friendly error instead of a traceback when `--input` points at a missing file.
+Both are covered by the seventh self-test assertion. Verification: regenerated
+`evals/RESULTS.md` and `examples/audit_report.md` must be byte-identical to the
+pre-fix versions.
+
 ## Adding a case
 
 Add to `dev.json` only while rules are still being designed, or to a new

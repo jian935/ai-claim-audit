@@ -84,7 +84,7 @@ Honest caveat: the same author wrote both splits and saw both, so this is **not 
 ## Eval results
 
 ```bash
-python scripts/audit_claims.py --self-test     # 6/6
+python scripts/audit_claims.py --self-test     # 7/7
 python scripts/run_evals.py --split all --out evals/RESULTS.md
 ```
 

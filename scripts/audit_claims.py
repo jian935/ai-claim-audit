@@ -151,7 +151,7 @@ def split_claims(text: str) -> list[str]:
             out.extend(c for c in cells if len(c) >= 8 and DIGIT.search(c))
             continue
         line = re.sub(r"^(?:[-*+]|\d+[.)])\s+", "", line)
-        for part in re.split(r"(?<=[。！？!?])\s*|;|；", line):
+        for part in re.split(r"(?<=[。！？!?])\s*|(?<=\.)\s+(?=[A-Z])|;|；", line):
             part = part.strip()
             if len(part) >= 6:
                 out.append(part)
@@ -258,8 +258,7 @@ def to_markdown(result: dict) -> str:
 def self_test() -> None:
     bad = "效果很好，准确率达到 94%，下周上线。"
     r = precheck_claim(bad)
-    assert "C01" in r, f"missed missing denominator: {r}"
-    assert "C10" in r, f"missed missing reproduction pointer: {r}"
+    assert {"C01", "C10"} <= set(r), f"missed denominator/reproduction pointer: {r}"
 
     good = ("在 1,167 条 JD 的留出集上，规则引擎的岗位族识别准确率为 93.6%，"
             "n=1167，复现脚本 scripts/real_eval_family.py，数据版本 2026-10-28。")
@@ -278,8 +277,11 @@ def self_test() -> None:
     two = split_claims("准确率 94%。成本下降 30%。")
     assert len(two) == 2, f"inline sentence splitting failed: {two}"
 
+    eng = split_claims("Accuracy 94%. Cost dropped 30%.")
+    assert len(eng) == 2, f"english sentence splitting failed: {eng}"
+
     json.dumps(precheck(bad + "\n" + good), ensure_ascii=False)
-    print("self-test: 6/6 passed")
+    print("self-test: 7/7 passed")
 
 
 def main() -> int:
@@ -298,7 +300,12 @@ def main() -> int:
     if not args.input and not args.text:
         ap.error("provide --input, --text, or --self-test")
 
-    text = args.input.read_text(encoding="utf-8") if args.input else args.text
+    if args.input and not args.input.exists():
+        ap.error(f"input file not found: {args.input}")
+    try:
+        text = args.input.read_text(encoding="utf-8") if args.input else args.text
+    except OSError as exc:
+        ap.error(f"cannot read {args.input}: {exc}")
     result = precheck(text)
     output = (json.dumps(result, ensure_ascii=False, indent=2)
               if args.format == "json" else to_markdown(result))

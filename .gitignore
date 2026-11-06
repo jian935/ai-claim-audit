@@ -12,3 +12,6 @@ dist/
 # Filled-in blind-eval answers: never commit (the blank template is tracked)
 evals/my_predictions.json
 evals/model_*.json
+evals/raw_reply*.txt
+# evals/MODEL_RESULTS.md is intentionally NOT ignored: a published score must
+# have a committed generated result file that check_docs.py can point at.

@@ -136,7 +136,9 @@ CI regenerates every report and fails the PR if any golden file changes: [`.gith
 The repo ships a question sheet with **no gold labels** and an answer template
 where all 40 answers are `null` — the scorer refuses to run until every one is
 filled, so a blank sheet can never produce a plausible-looking score. See
-[`evals/BLIND_EVAL.md`](evals/BLIND_EVAL.md) for the full procedure. In short:
+[`evals/BLIND_EVAL.md`](evals/BLIND_EVAL.md) for the method, or
+[`evals/BLIND_CHECKLIST.md`](evals/BLIND_CHECKLIST.md) for a step-by-step
+walkthrough with a raw-reply cleaner. In short:
 
 ```bash
 cp evals/predictions_template.json evals/my_predictions.json

@@ -130,8 +130,9 @@ CI 会重新生成全部报告，任一 golden 文件变化就让 PR 变红：[`
 ### 给真实模型打分（盲评）
 
 仓库自带一份**不含任何金标**的题目包，以及一份 40 个答案全是 `null` 的模板——
-没填完打分器直接拒绝运行，空模板不可能跑出一个看似合法的分数。完整流程见
-[`evals/BLIND_EVAL.md`](evals/BLIND_EVAL.md)，简版：
+没填完打分器直接拒绝运行，空模板不可能跑出一个看似合法的分数。方法论见
+[`evals/BLIND_EVAL.md`](evals/BLIND_EVAL.md)；照着点几下就能跑完的分步清单见
+[`evals/BLIND_CHECKLIST.md`](evals/BLIND_CHECKLIST.md)（含原始回复清洗脚本）。简版：
 
 ```bash
 cp evals/predictions_template.json evals/my_predictions.json
